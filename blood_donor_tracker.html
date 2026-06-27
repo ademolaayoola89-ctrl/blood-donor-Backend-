@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Blood Donor Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --crimson:#9B1C2E;--crimson-deep:#6B0F1E;
+  --rose:#E8A0A8;--blush:#F5D5D9;--warm-white:#FEFCFA;
+  --charcoal:#1A1014;--text-dark:#2C1518;--text-mid:#6B3640;--text-soft:#9B7078;
+  --gold:#C9933A;--gold-light:#E8C17A;
+  --ok:#1A6B45;--ok-bg:#D4EDDA;--warn:#7A4A00;--warn-bg:#FFF3CD;
+  --r:14px;--rs:10px;--top:60px;--bnav:64px;--sw:245px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;scroll-behavior:smooth}
+body{font-family:'Outfit',sans-serif;background:var(--warm-white);color:var(--text-dark);overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+.screen{display:none;min-height:100%;min-height:100dvh;width:100%}
+.screen.active{display:flex}
+
+/* ══ WELCOME ══ */
+#s-welcome{background:var(--crimson-deep);flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.wb1{position:absolute;width:480px;height:480px;border-radius:50%;background:radial-gradient(circle,rgba(155,28,46,.65),transparent 70%);top:-160px;right:-120px;pointer-events:none}
+.wb2{position:absolute;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(201,147,58,.1),transparent 70%);bottom:-70px;left:-70px;pointer-events:none}
+.wgrid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:55px 55px}
+.wc{position:relative;z-index:2;text-align:center;padding:2rem 1.5rem;animation:fadeUp .9s cubic-bezier(.16,1,.3,1) both}
+.wemb{width:100px;height:100px;margin:0 auto 1.5rem;position:relative;animation:floatP 3s ease-in-out infinite}
+.wring{position:absolute;inset:0;border-radius:50%;border:1.5px solid rgba(201,147,58,.38);animation:ringP 3s ease-in-out infinite}
+@keyframes ringP{0%,100%{transform:scale(1);opacity:.35}50%{transform:scale(1.11);opacity:.75}}
+@keyframes floatP{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+.wbrand{font-family:'Cormorant Garamond',serif;font-size:clamp(1.9rem,8vw,3.1rem);font-weight:300;color:#fff;letter-spacing:.02em;line-height:1.15;margin-bottom:.45rem}
+.wbrand span{color:var(--gold-light);font-style:italic}
+.wmotto{font-size:.76rem;font-weight:500;color:rgba(255,255,255,.5);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.2rem}
+.wline{width:42px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:.8rem auto 1.4rem}
+.wbtn{display:inline-flex;align-items:center;gap:.65rem;background:linear-gradient(135deg,var(--gold),#9A6E28);color:#fff;border:none;padding:.88rem 2.3rem;border-radius:50px;font-size:.88rem;font-weight:500;font-family:'Outfit',sans-serif;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;box-shadow:0 8px 26px rgba(201,147,58,.38)}
+.wbtn:active{transform:scale(.97)}
+.wclinic{margin-top:1.4rem;font-family:'Outfit',sans-serif;font-weight:700;font-size:.82rem;color:rgba(255,255,255,.48);letter-spacing:.1em;text-transform:uppercase}
+
+/* ══ AUTH BASE ══ */
+#s-login,#s-register,#s-staff{
+  background:linear-gradient(135deg,var(--crimson-deep),#3D0A13 50%,var(--crimson-deep));
+  align-items:center;justify-content:center;flex-direction:column;
+  padding:1.5rem 1rem;position:relative;overflow-y:auto
+}
+#s-login::before,#s-register::before,#s-staff::before{
+  content:'';position:absolute;width:400px;height:400px;border-radius:50%;
+  background:radial-gradient(circle,rgba(201,147,58,.07),transparent 70%);
+  top:-160px;right:-150px;pointer-events:none
+}
+.ac{background:var(--warm-white);border-radius:22px;width:100%;max-width:420px;overflow:hidden;box-shadow:0 24px 65px rgba(0,0,0,.45);animation:fadeUp .55s cubic-bezier(.16,1,.3,1) both}
+.ac.wide{max-width:460px}
+.ah{background:linear-gradient(135deg,var(--crimson),var(--crimson-deep));padding:1.55rem 1.7rem 1.35rem;text-align:center;position:relative}
+.ah::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:24px;background:var(--warm-white);border-radius:24px 24px 0 0}
+.alo{width:46px;height:46px;margin:0 auto .8rem;display:block}
+.at{font-family:'Cormorant Garamond',serif;font-size:1.65rem;font-weight:400;color:#fff;line-height:1.2}
+.as{font-size:.74rem;color:rgba(255,255,255,.5);margin-top:.22rem;letter-spacing:.04em}
+.ab{padding:1.2rem 1.5rem 1.7rem}
+.blnk{display:inline-flex;align-items:center;gap:.32rem;background:none;border:none;color:var(--text-mid);font-family:'Outfit',sans-serif;font-size:.8rem;cursor:pointer;margin-bottom:.9rem;padding:0}
+.blnk:active{color:var(--crimson)}
+
+/* ── shared form ── */
+.fg{margin-bottom:.85rem}
+.fg label{display:block;font-size:.67rem;font-weight:600;color:var(--text-mid);margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.1em}
+.fg input,.fg select{width:100%;padding:.76rem .95rem;border:1.5px solid #EAD8DA;border-radius:var(--rs);font-size:.91rem;font-family:'Outfit',sans-serif;color:var(--text-dark);background:var(--warm-white);outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;appearance:none}
+.fg input:focus,.fg select:focus{border-color:var(--crimson);box-shadow:0 0 0 3px rgba(155,28,46,.08)}
+.fg input[readonly]{background:var(--blush);color:var(--text-mid)}
+.fgr{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
+.flag{display:none;background:linear-gradient(135deg,#7A0000,#C0392B);color:#fff;border-radius:var(--rs);padding:.85rem 1rem;margin-bottom:.85rem;font-size:.83rem;line-height:1.5;animation:shake .4s ease;border-left:4px solid var(--gold)}
+.flag.on{display:block}
+.flag strong{display:block;font-size:.88rem;margin-bottom:.2rem;font-weight:600}
+.chip{display:none;align-items:center;gap:.4rem;background:linear-gradient(135deg,var(--crimson),var(--crimson-deep));color:#fff;border-radius:8px;padding:.48rem .88rem;font-size:.78rem;margin-top:.42rem;flex-wrap:wrap}
+.chip.on{display:flex}
+.chip strong{font-weight:600}
+.hint{font-size:.68rem;color:var(--text-soft);margin-top:.28rem}
+.bmain{width:100%;padding:.84rem;background:linear-gradient(135deg,var(--crimson),var(--crimson-deep));color:#fff;border:none;border-radius:var(--rs);font-size:.91rem;font-weight:500;font-family:'Outfit',sans-serif;cursor:pointer;box-shadow:0 4px 15px rgba(155,28,46,.3);letter-spacing:.04em}
+.bmain:active{transform:scale(.98)}
+.bghost{width:100%;padding:.78rem;background:transparent;color:var(--crimson);border:1.5px solid var(--rose);border-radius:var(--rs);font-size:.88rem;font-weight:500;font-family:'Outfit',sans-serif;cursor:pointer}
+.bghost:active{background:var(--blush)}
+.orline{text-align:center;color:var(--text-soft);font-size:.74rem;margin:.75rem 0;position:relative}
+.orline::before,.orline::after{content:'';position:absolute;top:50%;width:40%;height:1px;background:#EAD8DA}
+.orline::before{left:0}.orline::after{right:0}
+/* pin */
+.pingrid{display:grid;grid-template-columns:repeat(3,1fr);gap:.42rem;margin-bottom:.85rem}
+.pk{background:#fff;border:1.5px solid #EAD8DA;border-radius:10px;padding:.62rem;font-size:1rem;font-weight:600;font-family:'Outfit',sans-serif;color:var(--text-dark);cursor:pointer;text-align:center;transition:all .14s}
+.pk:active{transform:scale(.92);background:var(--blush)}
+.pk.sm{font-size:.75rem;font-weight:600;color:var(--text-mid)}
+
+/* ══ DASHBOARD ══ */
+#s-dashboard{flex-direction:column;background:#EDE8E6;min-height:100%;min-height:100dvh}
+
+/* topbar */
+.topbar{background:linear-gradient(90deg,var(--crimson-deep),var(--crimson));height:var(--top);padding:0 .9rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:400;box-shadow:0 2px 14px rgba(107,15,30,.4)}
+.tbl{display:flex;align-items:center;gap:.6rem}
+.tmenu{background:none;border:none;cursor:pointer;padding:.38rem;display:flex;flex-direction:column;gap:4px;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.tmenu span{display:block;width:19px;height:2px;background:#fff;border-radius:2px;transition:all .24s}
+.tmenu.open span:nth-child(1){transform:rotate(45deg) translate(4px,4px)}
+.tmenu.open span:nth-child(2){opacity:0}
+.tmenu.open span:nth-child(3){transform:rotate(-45deg) translate(4px,-4px)}
+.tlogo{width:28px;height:28px;flex-shrink:0}
+.tname{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:600;color:#fff;letter-spacing:.02em;white-space:nowrap}
+.tname span{color:var(--gold-light);font-style:italic}
+.tr{display:flex;align-items:center;gap:.7rem}
+.tclock{text-align:right;line-height:1.42}
+.ttime{font-size:.84rem;font-weight:600;color:#fff;font-variant-numeric:tabular-nums}
+.tdate{font-size:.59rem;color:rgba(255,255,255,.58);letter-spacing:.02em;white-space:nowrap}
+.tout{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.85);padding:.33rem .72rem;border-radius:6px;font-family:'Outfit',sans-serif;font-size:.72rem;cursor:pointer;display:none}
+@media(min-width:640px){.tout{display:block}}
+
+/* sidebar overlay */
+.sbov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:450;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+.sbov.on{display:block}
+
+/* sidebar */
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sw);background:var(--charcoal);z-index:460;display:flex;flex-direction:column;padding:0 .75rem .9rem;transform:translateX(-100%);transition:transform .26s cubic-bezier(.4,0,.2,1);overflow-y:auto}
+.sidebar.open{transform:translateX(0)}
+@media(min-width:860px){
+  .sidebar{position:relative;top:auto;left:auto;bottom:auto;transform:none;flex-shrink:0}
+  .sbov{display:none!important}
+  .tmenu{display:none}
+}
+.sbh{height:var(--top);display:flex;align-items:center;padding:0 .4rem;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:.5rem;flex-shrink:0}
+.sbclose{background:none;border:none;color:rgba(255,255,255,.38);cursor:pointer;font-size:1.2rem;margin-left:auto;padding:.2rem}
+.sbsec{font-size:.59rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,255,255,.17);padding:.65rem .85rem .28rem;margin-top:.25rem}
+.nav{display:flex;align-items:center;gap:.75rem;padding:.72rem .9rem;border-radius:10px;cursor:pointer;font-size:.86rem;color:rgba(255,255,255,.45);transition:all .17s;border:none;background:none;width:100%;font-family:'Outfit',sans-serif;text-align:left;position:relative;-webkit-tap-highlight-color:transparent}
+.nav:active,.nav:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.82)}
+.nav.on{background:linear-gradient(90deg,rgba(155,28,46,.55),rgba(155,28,46,.2));color:#fff;font-weight:500}
+.nav.on::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:3px;background:var(--gold);border-radius:0 3px 3px 0}
+.nico{width:17px;height:17px;flex-shrink:0;opacity:.68}
+.nav.on .nico{opacity:1}
+.nbadge{background:var(--crimson);color:#fff;border-radius:50px;padding:2px 7px;font-size:.64rem;font-weight:700;margin-left:auto}
+.sbfoot{margin-top:auto;padding-top:.75rem;border-top:1px solid rgba(255,255,255,.06)}
+
+/* bottom nav — mobile */
+.bnav{display:none;position:fixed;bottom:0;left:0;right:0;height:var(--bnav);background:var(--charcoal);z-index:300;border-top:1px solid rgba(255,255,255,.07);box-shadow:0 -3px 18px rgba(0,0,0,.28)}
+@media(max-width:859px){.bnav{display:grid;grid-template-columns:repeat(4,1fr)}}
+.bb{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.22rem;background:none;border:none;cursor:pointer;padding:.45rem .15rem;position:relative;font-family:'Outfit',sans-serif;-webkit-tap-highlight-color:transparent;width:100%}
+.bico{width:20px;height:20px;opacity:.4;transition:opacity .17s;flex-shrink:0}
+.blbl{font-size:.59rem;color:rgba(255,255,255,.38);font-weight:500;transition:color .17s}
+.bb.on .bico{opacity:1}
+.bb.on .blbl{color:var(--gold-light)}
+.bdot{position:absolute;top:.45rem;right:50%;transform:translateX(10px);background:var(--crimson);color:#fff;border-radius:50px;padding:1px 6px;font-size:.58rem;font-weight:700;min-width:16px;text-align:center}
+
+/* layout */
+.dlayout{display:flex;flex:1;overflow:hidden;min-height:0}
+.dmain{flex:1;padding:1.1rem;overflow-y:auto;-webkit-overflow-scrolling:touch;background:#EDE8E6;padding-bottom:calc(var(--bnav) + 1rem)}
+@media(min-width:860px){.dmain{padding:1.5rem;padding-bottom:1.5rem}}
+.panel{display:none}
+.panel.on{display:block;animation:fadeUp .28s ease}
+
+/* page header */
+.ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.1rem;gap:.7rem}
+.pht{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:400;color:var(--crimson-deep);line-height:1}
+.phs{font-size:.76rem;color:var(--text-soft);margin-top:.22rem}
+
+/* stat cards */
+.sg{display:grid;grid-template-columns:repeat(2,1fr);gap:.7rem;margin-bottom:1.1rem}
+@media(min-width:500px){.sg{grid-template-columns:repeat(4,1fr)}}
+.sc{background:#fff;border-radius:var(--r);padding:1rem;border:1px solid rgba(0,0,0,.04);position:relative;overflow:hidden}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc,var(--crimson))}
+.sc:active{transform:scale(.98)}
+.si{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:var(--ib,var(--blush));margin-bottom:.4rem}
+.sn{font-family:'Cormorant Garamond',serif;font-size:1.95rem;font-weight:600;color:var(--acc,var(--crimson));line-height:1}
+.sl{font-size:.66rem;color:var(--text-soft);text-transform:uppercase;letter-spacing:.07em;font-weight:600;margin-top:.18rem}
+
+/* card */
+.card{background:#fff;border-radius:var(--r);border:1px solid rgba(0,0,0,.04);overflow:hidden;margin-bottom:.9rem}
+.cardh{padding:.78rem 1rem;border-bottom:1px solid #F5EEEE;display:flex;align-items:center;justify-content:space-between}
+.cardt{font-size:.86rem;font-weight:600;color:var(--text-dark)}
+.cardm{font-size:.71rem;color:var(--text-soft)}
+
+/* table */
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table.dt{width:100%;border-collapse:collapse;font-size:.8rem;min-width:500px}
+table.dt th{text-align:left;padding:.58rem .85rem;background:#FBF5F5;color:var(--text-mid);font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;white-space:nowrap}
+table.dt td{padding:.7rem .85rem;border-bottom:1px solid #F8F0F0;color:var(--text-dark);vertical-align:middle}
+table.dt tbody tr:last-child td{border-bottom:none}
+
+/* badges */
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:50px;font-size:.69rem;font-weight:600;white-space:nowrap}
+.bok{background:var(--ok-bg);color:var(--ok)}
+.bwarn{background:var(--warn-bg);color:var(--warn)}
+.bnot{background:#FDECEA;color:var(--crimson)}
+.btype{background:var(--blush);color:var(--crimson-deep)}
+.bdonate{background:#1A1014;color:var(--gold-light)}
+
+/* action buttons */
+.badd{display:inline-flex;align-items:center;gap:.38rem;background:linear-gradient(135deg,var(--crimson),var(--crimson-deep));color:#fff;border:none;padding:.52rem 1.05rem;border-radius:8px;font-size:.78rem;font-weight:500;font-family:'Outfit',sans-serif;cursor:pointer;box-shadow:0 3px 10px rgba(155,28,46,.28);white-space:nowrap}
+.badd:active{transform:scale(.96)}
+.bedit{background:none;border:1.5px solid #EAD8DA;color:var(--text-mid);padding:.26rem .72rem;border-radius:6px;font-family:'Outfit',sans-serif;font-size:.72rem;cursor:pointer;font-weight:500;white-space:nowrap}
+.bedit:active{background:var(--blush);color:var(--crimson)}
+
+/* form card */
+.fcard{background:#fff;border-radius:var(--r);padding:1.3rem;border:1px solid rgba(0,0,0,.04);max-width:580px}
+.fcard h3{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:400;color:var(--crimson-deep);margin-bottom:1.1rem;padding-bottom:.75rem;border-bottom:1px solid #F5EEEE}
+
+/* notifications */
+.nfil{display:flex;gap:.4rem;margin-bottom:.9rem;flex-wrap:wrap}
+.fp{padding:.34rem .95rem;border-radius:50px;font-size:.76rem;font-family:'Outfit',sans-serif;cursor:pointer;border:1.5px solid #EAD8DA;background:#fff;color:var(--text-mid);transition:all .17s;white-space:nowrap}
+.fp.on{background:var(--crimson);color:#fff;border-color:var(--crimson)}
+.fp:active{transform:scale(.95)}
+.ni{background:#fff;border-radius:var(--r);border:1px solid rgba(0,0,0,.04);padding:.9rem 1rem;margin-bottom:.65rem;display:flex;align-items:flex-start;gap:.8rem}
+.ndot{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700;font-size:.9rem}
+.ndok{background:var(--ok-bg);color:var(--ok)}
+.ndwarn{background:var(--warn-bg);color:var(--warn)}
+.ni h4{font-size:.86rem;font-weight:500;color:var(--text-dark);margin-bottom:.16rem}
+.ni p{font-size:.75rem;color:var(--text-soft);line-height:1.42}
+.nitag{margin-left:auto;flex-shrink:0;text-align:right;padding-left:.45rem}
+.empty{text-align:center;padding:2.8rem 1rem;color:var(--text-soft)}
+.empty p{font-size:.84rem;margin-top:.65rem}
+
+/* modal */
+.mov{display:none;position:fixed;inset:0;background:rgba(26,16,20,.72);z-index:600;align-items:flex-end;justify-content:center;padding:0}
+.mov.open{display:flex}
+@media(min-width:580px){.mov{align-items:center;padding:1.2rem}}
+.mbox{background:var(--warm-white);border-radius:20px 20px 0 0;width:100%;max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;box-shadow:0 -8px 40px rgba(0,0,0,.3);animation:slideUp .3s cubic-bezier(.16,1,.3,1)}
+@media(min-width:580px){.mbox{border-radius:20px;max-width:480px;max-height:90vh;animation:fadeUp .3s ease}}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.mh{background:linear-gradient(135deg,var(--crimson),var(--crimson-deep));padding:1.1rem 1.4rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1}
+.mh h2{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:400;color:#fff}
+.mcls{background:rgba(255,255,255,.15);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center}
+.mbody{padding:1.2rem 1.4rem}
+.mft{padding:.1rem 1.4rem 1.2rem;display:flex;gap:.7rem;position:sticky;bottom:0;background:var(--warm-white)}
+.bsave{flex:1;padding:.75rem;background:linear-gradient(135deg,var(--crimson),var(--crimson-deep));color:#fff;border:none;border-radius:var(--rs);font-family:'Outfit',sans-serif;font-size:.88rem;font-weight:500;cursor:pointer}
+.bsave:active{transform:scale(.98)}
+.bcancel{padding:.75rem 1.2rem;background:transparent;border:1.5px solid #EAD8DA;color:var(--text-mid);border-radius:var(--rs);font-family:'Outfit',sans-serif;font-size:.88rem;cursor:pointer}
+.bcancel:active{background:var(--blush)}
+
+/* toast */
+.toast{position:fixed;bottom:calc(var(--bnav) + .8rem);left:50%;transform:translateX(-50%);background:var(--charcoal);color:#fff;padding:.78rem 1.3rem;border-radius:12px;font-size:.84rem;font-family:'Outfit',sans-serif;box-shadow:0 8px 30px rgba(0,0,0,.3);z-index:9999;display:none;border-left:3px solid var(--gold);white-space:nowrap;max-width:90vw;overflow:hidden;text-overflow:ellipsis}
+@media(min-width:860px){.toast{bottom:1.5rem;left:auto;right:1.5rem;transform:none}}
+
+/* Send Mail button in notifications */
+.mail-btn{display:inline-flex;align-items:center;gap:.38rem;background:linear-gradient(135deg,var(--crimson),var(--crimson-deep,#6B0F1E));color:#fff;text-decoration:none;padding:.38rem .88rem;border-radius:7px;font-size:.75rem;font-weight:500;font-family:'Outfit',sans-serif;transition:opacity .18s;flex-shrink:0}
+.mail-btn:active{opacity:.8}
+
+/* YES / NOT YET badges in notifications */
+.yesno{display:inline-flex;align-items:center;padding:4px 11px;border-radius:50px;font-size:.72rem;font-weight:700;white-space:nowrap;flex-shrink:0}
+.yesno.yes{background:#D4EDDA;color:#1A6B45}
+.yesno.notyet{background:#FFF3CD;color:#7A4A00}
+
+/* search bar */
+.srch-wrap{display:flex;align-items:center;gap:.55rem;background:#fff;border:1.5px solid #EAD8DA;border-radius:var(--rs);padding:.62rem .9rem;margin-bottom:.9rem;transition:border-color .2s}
+.srch-wrap:focus-within{border-color:var(--crimson)}
+.srch-input{flex:1;border:none;outline:none;font-size:.88rem;font-family:'Outfit',sans-serif;color:var(--text-dark);background:transparent;min-width:0}
+.srch-input::placeholder{color:#C0A0A8}
+
+/* date group header */
+.dg-head{display:flex;align-items:center;justify-content:space-between;padding:.5rem .25rem .35rem;margin-top:.4rem}
+.dg-date{font-size:.72rem;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:.07em}
+.dg-count{background:var(--blush);color:var(--crimson);font-size:.68rem;font-weight:700;padding:2px 9px;border-radius:50px}
+
+/* donor row card */
+.drow{background:#fff;border-radius:var(--r);border:1px solid rgba(0,0,0,.04);padding:.9rem 1rem;margin-bottom:.5rem;position:relative;overflow:hidden}
+.drow.ineligible{border-left:4px solid var(--crimson);background:#FFFAFA}
+.drow-flag{display:flex;align-items:center;gap:.45rem;background:linear-gradient(90deg,#C0392B,#9B1C2E);color:#fff;font-size:.72rem;font-weight:600;padding:.3rem .8rem;border-radius:6px;margin-bottom:.5rem;animation:shake .35s ease}
+.drow-top{display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;margin-bottom:.4rem}
+.drow-name{font-size:.9rem;font-weight:600;color:var(--text-dark)}
+.drow-type{font-size:.68rem;color:var(--text-soft);margin-top:.1rem}
+.drow-meta{display:flex;flex-wrap:wrap;gap:.5rem .9rem;font-size:.76rem;color:var(--text-mid);margin-bottom:.5rem}
+.drow-meta span{display:flex;align-items:center;gap:.25rem}
+.drow-actions{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.4rem}
+.bsms{display:inline-flex;align-items:center;gap:.35rem;background:linear-gradient(135deg,#1A6B45,#0F4A2E);color:#fff;text-decoration:none;padding:.34rem .78rem;border-radius:7px;font-size:.72rem;font-weight:500;font-family:'Outfit',sans-serif;flex-shrink:0}
+.bsms:active{opacity:.8}
+
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--rose);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════
+     WELCOME
+═══════════════════════════════ -->
+<div class="screen active" id="s-welcome">
+  <div class="wb1"></div><div class="wb2"></div><div class="wgrid"></div>
+  <svg style="position:absolute;top:8%;right:6%;opacity:.07;pointer-events:none" width="220" height="275" viewBox="0 0 220 275" fill="none"><path d="M110 9C110 9 16 108 16 172 16 228 58 268 110 268 162 268 204 228 204 172 204 108 110 9Z" fill="#fff"/></svg>
+  <svg style="position:absolute;bottom:7%;left:5%;opacity:.04;pointer-events:none;transform:rotate(18deg)" width="140" height="176" viewBox="0 0 140 176" fill="none"><path d="M70 6C70 6 9 68 9 109 9 145 37 168 70 168 103 168 131 145 131 109 131 68 70 6Z" fill="#fff"/></svg>
+  <div class="wc">
+    <div class="wemb">
+      <div class="wring"></div>
+      <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
+        <circle cx="50" cy="50" r="49" fill="rgba(155,28,46,.2)" stroke="rgba(201,147,58,.35)" stroke-width="1.2"/>
+        <path d="M50 14C50 14 25 40 25 58 25 73 36 86 50 86 64 86 75 73 75 58 75 40 50 14Z" fill="url(#dg)"/>
+        <rect x="42" y="52" width="16" height="4.5" rx="2.25" fill="white"/>
+        <rect x="47.75" y="44" width="4.5" height="21" rx="2.25" fill="white"/>
+        <defs><linearGradient id="dg" x1="25" y1="14" x2="75" y2="86" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#E84060"/><stop offset="100%" stop-color="#6B0F1E"/></linearGradient></defs>
+      </svg>
+    </div>
+    <div class="wbrand">Blood Donor <span>Tracker</span></div>
+    <div class="wmotto">Every drop counts. Every donor matters.</div>
+    <div class="wline"></div>
+    <button class="wbtn" onclick="show('s-login')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+      Enter Portal
+    </button>
+    <div class="wclinic">LASUTH Blood Donor Clinic</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     LOGIN
+═══════════════════════════════ -->
+<div class="screen" id="s-login">
+  <div class="ac">
+    <div class="ah">
+      <svg class="alo" viewBox="0 0 48 48" fill="none">
+        <circle cx="24" cy="24" r="24" fill="rgba(255,255,255,.1)"/>
+        <path d="M24 7C24 7 11 20 11 30 11 37.7 17 44 24 44 31 44 37 37.7 37 30 37 20 24 7 24 7Z" fill="white"/>
+        <rect x="19" y="27" width="10" height="3.5" rx="1.75" fill="#9B1C2E"/>
+        <rect x="22.25" y="22" width="3.5" height="14" rx="1.75" fill="#9B1C2E"/>
+      </svg>
+      <div class="at">Welcome Back</div>
+      <div class="as">Sign in to Blood Donor Tracker</div>
+    </div>
+    <div class="ab">
+      <div class="flag on" id="lf" style="display:none">
+        <strong>⚠ Donor Not Eligible</strong>
+        Donated recently — cannot give blood yet. Next eligible: <span id="lnv" style="font-weight:700"></span>
+      </div>
+      <div class="fg">
+        <label>Name or Phone Number</label>
+        <input type="text" id="lid" placeholder="Enter your name or phone number" oninput="checkLE()"/>
+        <div class="hint">Enter either your full name <em>or</em> your phone number</div>
+      </div>
+      <button class="bmain" onclick="doLogin()" style="margin-bottom:.85rem">Sign In</button>
+      <div class="orline">or</div>
+      <button class="bghost" onclick="show('s-register')">Register as New Donor</button>
+      <p style="text-align:center;margin-top:.9rem;font-size:.77rem;color:var(--text-soft)">
+        <span style="cursor:pointer;text-decoration:underline;color:var(--crimson)" onclick="show('s-staff')">Staff / Admin Access →</span>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     STAFF PIN
+═══════════════════════════════ -->
+<div class="screen" id="s-staff">
+  <div class="ac">
+    <div class="ah">
+      <svg class="alo" viewBox="0 0 48 48" fill="none">
+        <circle cx="24" cy="24" r="24" fill="rgba(255,255,255,.1)"/>
+        <rect x="14" y="21" width="20" height="16" rx="3" fill="white"/>
+        <path d="M18 21v-5a6 6 0 0 1 12 0v5" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <circle cx="24" cy="28.5" r="2" fill="#9B1C2E"/>
+        <line x1="24" y1="30.5" x2="24" y2="33.5" stroke="#9B1C2E" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <div class="at">Staff Access</div>
+      <div class="as">Enter your PIN to access the dashboard</div>
+    </div>
+    <div class="ab">
+      <button class="blnk" onclick="show('s-login')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Login
+      </button>
+      <div class="flag" id="sff"><strong>⚠ Incorrect PIN</strong>Please try again.</div>
+      <div class="fg">
+        <label>Staff PIN</label>
+        <div style="position:relative">
+          <input type="password" id="spin" placeholder="Enter staff PIN" style="padding-right:3.2rem" onkeydown="if(event.key==='Enter')doStaff()"/>
+          <button onclick="tPin()" id="peye" style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-soft);font-size:.76rem;font-family:'Outfit',sans-serif">Show</button>
+        </div>
+        <div class="hint">Default PIN: <strong style="color:var(--crimson)">1234</strong></div>
+      </div>
+      <div class="pingrid">
+        <button class="pk" onclick="pk('1')">1</button><button class="pk" onclick="pk('2')">2</button><button class="pk" onclick="pk('3')">3</button>
+        <button class="pk" onclick="pk('4')">4</button><button class="pk" onclick="pk('5')">5</button><button class="pk" onclick="pk('6')">6</button>
+        <button class="pk" onclick="pk('7')">7</button><button class="pk" onclick="pk('8')">8</button><button class="pk" onclick="pk('9')">9</button>
+        <button class="pk sm" onclick="pclr()">Clear</button><button class="pk" onclick="pk('0')">0</button><button class="pk sm" onclick="pdel()">⌫</button>
+      </div>
+      <button class="bmain" onclick="doStaff()">Access Dashboard</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     REGISTER
+═══════════════════════════════ -->
+<div class="screen" id="s-register">
+  <div class="ac wide">
+    <div class="ah">
+      <div class="at">New Donor</div>
+      <div class="as">Register with Blood Donor Tracker</div>
+    </div>
+    <div class="ab">
+      <button class="blnk" onclick="show('s-login')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Login
+      </button>
+      <div class="flag" id="rf"><strong>⚠ Too Soon to Donate</strong>Next eligible date: <span id="rfd" style="font-weight:700"></span></div>
+      <div class="fgr">
+        <div class="fg"><label>First Name</label><input type="text" id="rfn" placeholder="First name"/></div>
+        <div class="fg"><label>Last Name</label><input type="text" id="rln" placeholder="Last name"/></div>
+      </div>
+      <div class="fgr">
+        <div class="fg"><label>Sex</label><select id="rsx"><option value="">Select</option><option>Male</option><option>Female</option></select></div>
+        <div class="fg"><label>Date of Birth</label><input type="date" id="rdob" onchange="ca('rdob','rage')"/></div>
+      </div>
+      <div class="fgr">
+        <div class="fg"><label>Age (auto)</label><input type="text" id="rage" readonly placeholder="Auto"/></div>
+        <div class="fg"><label>Phone</label><input type="tel" id="rph" placeholder="080XXXXXXXX"/></div>
+      </div>
+      <div class="fg"><label>Email</label><input type="email" id="rem" placeholder="email@example.com"/></div>
+      <div class="fg"><label>Donation Type</label>
+        <select id="rdt"><option value="">Select type</option><option value="voluntary">Voluntary</option><option value="family">Family Replacement</option></select>
+      </div>
+      <div class="fg">
+        <label>Date of Donation</label>
+        <input type="date" id="rdd" onchange="cn('rdd','rchip','rcv','rf','rfd')"/>
+        <div class="chip" id="rchip">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Next eligible: <strong id="rcv"></strong>
+        </div>
+      </div>
+      <button class="bmain" onclick="doReg()">Complete Registration</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     DASHBOARD
+═══════════════════════════════ -->
+<div class="screen" id="s-dashboard">
+  <div style="width:100%;display:flex;flex-direction:column;min-height:100%;min-height:100dvh">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="tbl">
+        <button class="tmenu" id="mbtn" onclick="toggleSB()" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+        <svg class="tlogo" viewBox="0 0 28 28" fill="none">
+          <circle cx="14" cy="14" r="14" fill="rgba(255,255,255,.12)"/>
+          <path d="M14 4C14 4 6 12 6 18 6 22.4 9.6 26 14 26 18.4 26 22 22.4 22 18 22 12 14 4 14 4Z" fill="white"/>
+          <rect x="10.5" y="15.5" width="7" height="2.5" rx="1.25" fill="#9B1C2E"/>
+          <rect x="12.75" y="11.5" width="2.5" height="10" rx="1.25" fill="#9B1C2E"/>
+        </svg>
+        <div class="tname">Blood Donor <span>Tracker</span></div>
+      </div>
+      <div class="tr">
+        <div class="tclock"><div class="ttime" id="ckt">--:--</div><div class="tdate" id="ckd">Loading...</div></div>
+        <button class="tout" onclick="show('s-welcome')">Sign Out</button>
+      </div>
+    </div>
+
+    <div class="dlayout">
+      <!-- SIDEBAR OVERLAY -->
+      <div class="sbov" id="sbov" onclick="closeSB()"></div>
+
+      <!-- SIDEBAR -->
+      <div class="sidebar" id="sidebar">
+        <div class="sbh">
+          <svg width="24" height="24" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="14" fill="rgba(155,28,46,.3)"/><path d="M14 4C14 4 6 12 6 18 6 22.4 9.6 26 14 26 18.4 26 22 22.4 22 18 22 12 14 4Z" fill="white"/></svg>
+          <button class="sbclose" onclick="closeSB()">✕</button>
+        </div>
+        <div class="sbsec">Main</div>
+        <button class="nav on" id="nb-overview" onclick="navTo('overview')">
+          <svg class="nico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Overview
+        </button>
+        <button class="nav" id="nb-add" onclick="navTo('add')">
+          <svg class="nico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Add Donor
+        </button>
+        <button class="nav" id="nb-donors" onclick="navTo('donors')">
+          <svg class="nico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Donor Records
+        </button>
+        <div class="sbsec">Alerts</div>
+        <button class="nav" id="nb-notif" onclick="navTo('notif')">
+          <svg class="nico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Notifications
+          <span class="nbadge" id="nbc">0</span>
+        </button>
+        <div class="sbfoot">
+          <button class="nav" onclick="show('s-welcome')">
+            <svg class="nico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign Out
+          </button>
+        </div>
+      </div>
+
+      <!-- MAIN -->
+      <div class="dmain">
+
+        <!-- OVERVIEW -->
+        <div class="panel on" id="panel-overview">
+          <div class="ph">
+            <div><div class="pht">Overview</div><div class="phs">Blood donor summary</div></div>
+            <button class="badd" onclick="navTo('add')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add</button>
+          </div>
+          <!-- 4 stat cards -->
+          <div class="sg">
+            <div class="sc" style="--acc:var(--crimson);--ib:var(--blush)">
+              <div class="si"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9B1C2E" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+              <div class="sn" id="st0">0</div><div class="sl">Total Donors</div>
+            </div>
+            <div class="sc" style="--acc:#1A3A6B;--ib:#D4E4ED">
+              <div class="si"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1A3A6B" stroke-width="1.8"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"/><path d="M8 12l2.5 2.5L16 9" stroke="#1A3A6B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+              <div class="sn" id="st1" style="color:#1A3A6B">0</div><div class="sl">Total Donated</div>
+            </div>
+            <div class="sc" style="--acc:#7A4A00;--ib:#FFF3CD">
+              <div class="si"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7A4A00" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg></div>
+              <div class="sn" id="st2" style="color:#7A4A00">0</div><div class="sl">Family Replacement</div>
+            </div>
+            <div class="sc" style="--acc:#1A6B45;--ib:#D4EDDA">
+              <div class="si"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1A6B45" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+              <div class="sn" id="st3" style="color:#1A6B45">0</div><div class="sl">Voluntary</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ADD DONOR -->
+        <div class="panel" id="panel-add">
+          <div class="ph"><div><div class="pht">Add Donor</div><div class="phs">New donor record</div></div></div>
+          <div class="fcard">
+            <h3>Donor Information</h3>
+            <div class="flag" id="af"><strong>⚠ Not Yet Eligible</strong>Cannot donate until: <span id="afd" style="font-weight:700"></span></div>
+            <div class="fgr">
+              <div class="fg"><label>First Name</label><input type="text" id="afn" placeholder="First name"/></div>
+              <div class="fg"><label>Last Name</label><input type="text" id="aln" placeholder="Last name"/></div>
+            </div>
+            <div class="fgr">
+              <div class="fg"><label>Sex</label><select id="asx"><option value="">Select</option><option>Male</option><option>Female</option></select></div>
+              <div class="fg"><label>Date of Birth</label><input type="date" id="adob" onchange="ca('adob','aage')"/></div>
+            </div>
+            <div class="fgr">
+              <div class="fg"><label>Age (auto)</label><input type="text" id="aage" readonly placeholder="Auto"/></div>
+              <div class="fg"><label>Phone</label><input type="tel" id="aph" placeholder="080XXXXXXXX"/></div>
+            </div>
+            <div class="fg"><label>Email</label><input type="email" id="aem" placeholder="email@example.com"/></div>
+            <div class="fg"><label>Donation Type</label>
+              <select id="adt"><option value="">Select type</option><option value="voluntary">Voluntary</option><option value="family">Family Replacement</option></select>
+            </div>
+            <div class="fg">
+              <label>Date of Donation</label>
+              <input type="date" id="add" onchange="cn('add','achip','acv','af','afd')"/>
+              <div class="chip" id="achip">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Next eligible: <strong id="acv"></strong>
+              </div>
+            </div>
+            <button class="bmain" style="max-width:200px;margin-top:.25rem" onclick="saveDonor()">Save Record</button>
+          </div>
+        </div>
+
+        <!-- DONOR RECORDS -->
+        <div class="panel" id="panel-donors">
+          <div class="ph">
+            <div><div class="pht">Donor Records</div><div class="phs">All registered donors</div></div>
+            <button class="badd" onclick="navTo('add')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add</button>
+          </div>
+          <!-- Search bar -->
+          <div class="srch-wrap">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;opacity:.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="dr-search" placeholder="Search by name or donation date…" oninput="renderDonors()" class="srch-input"/>
+            <button id="srch-clear" onclick="clearSearch()" style="display:none;background:none;border:none;cursor:pointer;color:var(--text-soft);font-size:1.1rem;padding:0 .2rem;line-height:1">✕</button>
+          </div>
+          <!-- grouped records injected here -->
+          <div id="dr-groups"></div>
+          <div id="dr-empty" style="display:none;text-align:center;padding:2.5rem 1rem;color:var(--text-soft)">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#DDD" stroke-width="1.4" style="margin:0 auto .5rem;display:block"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <p style="font-size:.82rem">No records yet — <span style="color:var(--crimson);cursor:pointer;text-decoration:underline" onclick="navTo('add')">add a donor →</span></p>
+          </div>
+        </div>
+
+        <!-- NOTIFICATIONS -->
+        <div class="panel" id="panel-notif">
+          <div class="ph"><div><div class="pht">Notifications</div><div class="phs">All donor eligibility alerts</div></div></div>
+          <div class="nfil">
+            <button class="fp on" id="fp-all" onclick="fN('all')">All</button>
+            <button class="fp" id="fp-due" onclick="fN('due')">Due for Donation</button>
+          </div>
+          <div id="notif-list"></div>
+        </div>
+
+      </div><!-- /dmain -->
+    </div><!-- /dlayout -->
+
+    <!-- BOTTOM NAV (mobile) -->
+    <div class="bnav">
+      <button class="bb on" id="bn-overview" onclick="navTo('overview')">
+        <svg class="bico" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.7"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        <span class="blbl">Overview</span>
+      </button>
+      <button class="bb" id="bn-add" onclick="navTo('add')">
+        <svg class="bico" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.7"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        <span class="blbl">Add</span>
+      </button>
+      <button class="bb" id="bn-donors" onclick="navTo('donors')">
+        <svg class="bico" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.7"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        <span class="blbl">Records</span>
+      </button>
+      <button class="bb" id="bn-notif" onclick="navTo('notif')">
+        <svg class="bico" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.7"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="blbl">Alerts</span>
+        <span class="bdot" id="bndot" style="display:none">0</span>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="mov" id="edit-modal">
+  <div class="mbox">
+    <div class="mh"><h2>Edit Donor</h2><button class="mcls" onclick="closeMod()">✕</button></div>
+    <div class="mbody">
+      <input type="hidden" id="ei"/>
+      <div class="fgr">
+        <div class="fg"><label>First Name</label><input type="text" id="efn"/></div>
+        <div class="fg"><label>Last Name</label><input type="text" id="eln"/></div>
+      </div>
+      <div class="fgr">
+        <div class="fg"><label>Sex</label><select id="esx"><option value="">Select</option><option>Male</option><option>Female</option></select></div>
+        <div class="fg"><label>Date of Birth</label><input type="date" id="edob" onchange="ca('edob','eage')"/></div>
+      </div>
+      <div class="fgr">
+        <div class="fg"><label>Age (auto)</label><input type="text" id="eage" readonly/></div>
+        <div class="fg"><label>Phone</label><input type="tel" id="eph"/></div>
+      </div>
+      <div class="fg"><label>Email</label><input type="email" id="eem"/></div>
+      <div class="fg"><label>Donation Type</label>
+        <select id="edt"><option value="voluntary">Voluntary</option><option value="family">Family Replacement</option></select>
+      </div>
+      <div class="fg">
+        <label>Date of Donation</label>
+        <input type="date" id="edd" onchange="cn('edd','echip','ecv',null,null)"/>
+        <div class="chip" id="echip">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Next eligible: <strong id="ecv"></strong>
+        </div>
+      </div>
+    </div>
+    <div class="mft">
+      <button class="bcancel" onclick="closeMod()">Cancel</button>
+      <button class="bsave" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── DATA ── starts empty; donors added via form */
+var donors=[];
+var nFil='all';
+var SPIN='1234';
+var isStaff=false; // set true only when logged in via staff PIN
+
+/* ── SCREEN ── */
+function show(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  var el=document.getElementById(id);
+  el.classList.add('active');
+  if(id==='s-dashboard'){renderAll();startClock();}
+  window.scrollTo(0,0);
+}
+
+/* ── SIDEBAR ── */
+function toggleSB(){
+  var sb=document.getElementById('sidebar');
+  var ov=document.getElementById('sbov');
+  var mb=document.getElementById('mbtn');
+  if(sb.classList.contains('open')){closeSB();}
+  else{sb.classList.add('open');ov.classList.add('on');mb.classList.add('open');}
+}
+function closeSB(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sbov').classList.remove('on');
+  document.getElementById('mbtn').classList.remove('open');
+}
+
+/* ── NAV ── */
+function navTo(p){
+  closeSB();
+  ['overview','add','donors','notif'].forEach(function(x){
+    var nb=document.getElementById('nb-'+x);
+    var bn=document.getElementById('bn-'+x);
+    if(nb) nb.classList.toggle('on',x===p);
+    if(bn) bn.classList.toggle('on',x===p);
+  });
+  document.querySelectorAll('.panel').forEach(function(el){el.classList.remove('on');});
+  document.getElementById('panel-'+p).classList.add('on');
+  if(p==='notif') renderNotif();
+}
+
+/* ── LOGIN ── */
+function checkLE(){
+  var v=document.getElementById('lid').value.trim();
+  var fl=document.getElementById('lf');
+  fl.style.display='none';fl.classList.remove('on');
+  if(v.length<3) return;
+  var f=donors.find(function(d){return d.phone===v||(d.fname+' '+d.lname).toLowerCase()===v.toLowerCase();});
+  if(!f) return;
+  var t=new Date();t.setHours(0,0,0,0);
+  var nd=new Date(f.nextDate);nd.setHours(0,0,0,0);
+  if(nd>t){
+    fl.style.display='block';fl.classList.add('on');
+    document.getElementById('lnv').textContent=fd(f.nextDate);
+  }
+}
+function doLogin(){
+  var v=document.getElementById('lid').value.trim();
+  if(!v){toast('Please enter your name or phone number.');return;}
+  isStaff=false;
+  show('s-dashboard');
+}
+
+/* ── STAFF PIN ── */
+function pk(k){document.getElementById('spin').value+=k;}
+function pdel(){var e=document.getElementById('spin');e.value=e.value.slice(0,-1);}
+function pclr(){document.getElementById('spin').value='';}
+function tPin(){var e=document.getElementById('spin');var b=document.getElementById('peye');if(e.type==='password'){e.type='text';b.textContent='Hide';}else{e.type='password';b.textContent='Show';}}
+function doStaff(){
+  var p=document.getElementById('spin').value;
+  var fl=document.getElementById('sff');
+  fl.classList.remove('on');
+  if(p===SPIN){document.getElementById('spin').value='';isStaff=true;show('s-dashboard');}
+  else{fl.classList.add('on');document.getElementById('spin').value='';}
+}
+
+/* ── AGE ── */
+function ca(dId,aId){
+  var v=document.getElementById(dId).value;
+  if(!v)return;
+  document.getElementById(aId).value=Math.floor((new Date()-new Date(v))/(365.25*24*3600*1000))+' yrs';
+}
+
+/* ── NEXT DATE + FLAG ── */
+function cn(dId,cId,vId,fId,fdId){
+  var d=document.getElementById(dId).value;
+  if(cId){document.getElementById(cId).classList.remove('on');}
+  if(fId){document.getElementById(fId).classList.remove('on');}
+  if(!d)return;
+  var nd=new Date(d);nd.setMonth(nd.getMonth()+3);
+  var nds=nd.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  if(vId)document.getElementById(vId).textContent=nds;
+  if(cId)document.getElementById(cId).classList.add('on');
+  var t=new Date();t.setHours(0,0,0,0);nd.setHours(0,0,0,0);
+  if(nd>t&&fId){
+    document.getElementById(fId).classList.add('on');
+    if(fdId)document.getElementById(fdId).textContent=nds;
+  }
+}
+
+/* ── REGISTER ── */
+function doReg(){
+  var fn=document.getElementById('rfn').value.trim();
+  var ln=document.getElementById('rln').value.trim();
+  var sx=document.getElementById('rsx').value;
+  var db=document.getElementById('rdob').value;
+  var ph=document.getElementById('rph').value.trim();
+  var em=document.getElementById('rem').value.trim();
+  var dt=document.getElementById('rdt').value;
+  var dd=document.getElementById('rdd').value;
+  if(!fn||!ln||!sx||!db||!ph||!dt||!dd){toast('Please fill all required fields.');return;}
+  var age=Math.floor((new Date()-new Date(db))/(365.25*24*3600*1000));
+  var nd=new Date(dd);nd.setMonth(nd.getMonth()+3);
+  donors.unshift({fname:fn,lname:ln,sex:sx,dob:db,age:age,phone:ph,email:em,dtype:dt,donDate:dd,nextDate:nd.toISOString().split('T')[0]});
+  toast('Registered! Welcome, '+fn+'!');
+  show('s-dashboard');setTimeout(function(){navTo('donors');},150);
+}
+
+/* ── ADD DONOR (from dashboard) ── */
+function saveDonor(){
+  var fn=document.getElementById('afn').value.trim();
+  var ln=document.getElementById('aln').value.trim();
+  var sx=document.getElementById('asx').value;
+  var db=document.getElementById('adob').value;
+  var ph=document.getElementById('aph').value.trim();
+  var em=document.getElementById('aem').value.trim();
+  var dt=document.getElementById('adt').value;
+  var dd=document.getElementById('add').value;
+  if(!fn||!ln||!sx||!db||!ph||!dt||!dd){toast('Please complete all required fields.');return;}
+  var age=Math.floor((new Date()-new Date(db))/(365.25*24*3600*1000));
+  var nd=new Date(dd);nd.setMonth(nd.getMonth()+3);
+  donors.unshift({fname:fn,lname:ln,sex:sx,dob:db,age:age,phone:ph,email:em,dtype:dt,donDate:dd,nextDate:nd.toISOString().split('T')[0]});
+  ['afn','aln','adob','aage','aph','aem','add'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('asx').value='';document.getElementById('adt').value='';
+  document.getElementById('achip').classList.remove('on');document.getElementById('af').classList.remove('on');
+  toast('Donor record saved!');renderAll();navTo('donors');
+}
+
+/* ── STATUS ──
+   diff = days until next eligible date
+   diff <= 0  → past/today → ELIGIBLE (ready to donate again)
+   1–14 days  → DUE SOON (approaching eligibility)
+   > 14 days  → NOT ELIGIBLE (donated too recently, still waiting)
+*/
+function dSt(nextDate){
+  var nd=new Date(nextDate),t=new Date();
+  t.setHours(0,0,0,0);nd.setHours(0,0,0,0);
+  var diff=Math.ceil((nd-t)/(24*3600*1000));
+  if(diff<=0) return{lbl:'Eligible',cls:'bok',diff:diff,type:'ok'};
+  if(diff<=14) return{lbl:'Due Soon',cls:'bwarn',diff:diff,type:'warn'};
+  return{lbl:'Not Eligible',cls:'bnot',diff:diff,type:'not'};
+}
+
+/* ── COUNTDOWN ── */
+function cdTxt(nextDate){
+  var nd=new Date(nextDate),t=new Date();
+  t.setHours(0,0,0,0);nd.setHours(0,0,0,0);
+  var diff=Math.ceil((nd-t)/(24*3600*1000));
+  if(diff<=0)return 'Ready to donate now';
+  var m=Math.floor(diff/30),d=diff%30;
+  if(m>0&&d>0)return m+'mo '+d+'d remaining';
+  if(m>0)return m+' month'+(m>1?'s':'')+' remaining';
+  return d+' day'+(d!==1?'s':'')+' remaining';
+}
+
+function fd(d){return new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});}
+
+/* ── RENDER ALL ── */
+function renderAll(){
+  var totalDonated=donors.length;
+  var family=donors.filter(function(d){return d.dtype==='family';}).length;
+  var voluntary=donors.filter(function(d){return d.dtype==='voluntary';}).length;
+  document.getElementById('st0').textContent=donors.length;
+  document.getElementById('st1').textContent=totalDonated;
+  document.getElementById('st2').textContent=family;
+  document.getElementById('st3').textContent=voluntary;
+  renderDonors();
+  renderNotif();
+}
+
+/* ── RENDER DONORS (grouped by donation date, with search) ── */
+function renderDonors(){
+  var q=(document.getElementById('dr-search')||{value:''}).value.trim().toLowerCase();
+  var clearBtn=document.getElementById('srch-clear');
+  if(clearBtn) clearBtn.style.display=q?'block':'none';
+
+  var groups=document.getElementById('dr-groups');
+  var empty=document.getElementById('dr-empty');
+  if(!donors.length){if(groups)groups.innerHTML='';if(empty)empty.style.display='block';return;}
+  if(empty) empty.style.display='none';
+
+  // Filter by search query (name or date)
+  var filtered=donors.filter(function(d,i){
+    d._idx=i; // store original index for edit
+    if(!q) return true;
+    var fullName=(d.fname+' '+d.lname).toLowerCase();
+    return fullName.includes(q) || d.donDate.includes(q) || fd(d.donDate).toLowerCase().includes(q);
+  });
+
+  // Re-assign _idx after filter
+  filtered=donors.map(function(d,i){return Object.assign({},d,{_idx:i});}).filter(function(d){
+    if(!q) return true;
+    var fullName=(d.fname+' '+d.lname).toLowerCase();
+    return fullName.includes(q) || d.donDate.includes(q) || fd(d.donDate).toLowerCase().includes(q);
+  });
+
+  if(!filtered.length){
+    if(groups) groups.innerHTML='<div style="text-align:center;padding:2rem;color:var(--text-soft);font-size:.85rem">No matching donors found.</div>';
+    return;
+  }
+
+  // Group by donDate
+  var byDate={};
+  filtered.forEach(function(d){
+    var key=d.donDate;
+    if(!byDate[key]) byDate[key]=[];
+    byDate[key].push(d);
+  });
+
+  // Sort dates descending
+  var sortedDates=Object.keys(byDate).sort(function(a,b){return b.localeCompare(a);});
+
+  var today=new Date(); today.setHours(0,0,0,0);
+  var html=sortedDates.map(function(dateKey){
+    var group=byDate[dateKey];
+    var dLabel=fd(dateKey);
+    var dObj=new Date(dateKey); dObj.setHours(0,0,0,0);
+    var isToday=dObj.getTime()===today.getTime();
+    var isYesterday=(today-dObj)===86400000;
+    var labelPrefix=isToday?'Today — ':isYesterday?'Yesterday — ':'';
+
+    var rowsHtml=group.map(function(d){
+      var nd=new Date(d.nextDate); nd.setHours(0,0,0,0);
+      var diff=Math.ceil((nd-today)/(24*3600*1000));
+      var notEligible=diff>0; // still within 3-month window
+
+      // flag banner if not yet eligible
+      var flagHtml=notEligible
+        ? '<div class="drow-flag"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>⚠ NOT YET ELIGIBLE — Next eligible: '+fd(d.nextDate)+'</div>'
+        : '';
+
+      var typeLabel=d.dtype==='voluntary'?'Voluntary':'Family Replacement';
+      var editBtn=isStaff?'<button class="bedit" onclick="openEdit('+d._idx+')">Edit</button>':'';
+
+      // Build contact buttons
+      var smsBody=diff<=0
+        ? encodeURIComponent('Dear '+d.fname+', you are now eligible to donate blood again at LASUTH Blood Donor Clinic. Please come in at your earliest convenience. Thank you.')
+        : encodeURIComponent('Dear '+d.fname+', thank you for donating blood. You will be eligible to donate again on '+fd(d.nextDate)+'. LASUTH Blood Donor Clinic.');
+      var smsBtn='<a href="sms:'+d.phone+'?body='+smsBody+'" class="bsms">'+
+        '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>SMS</a>';
+
+      var mailSubject=encodeURIComponent('Blood Donation — LASUTH Blood Donor Clinic');
+      var mailBody=diff<=0
+        ? encodeURIComponent('Dear '+d.fname+' '+d.lname+',\n\nYou are now eligible to donate blood again.\nLast donation: '+fd(d.donDate)+'\n\nPlease visit LASUTH Blood Donor Clinic at your earliest convenience.\n\nThank you,\nLASUTH Blood Donor Clinic')
+        : encodeURIComponent('Dear '+d.fname+' '+d.lname+',\n\nThank you for your blood donation on '+fd(d.donDate)+'.\nYou will be eligible to donate again from '+fd(d.nextDate)+'.\n\nThank you,\nLASUTH Blood Donor Clinic');
+      var mailTo=d.email?encodeURIComponent(d.email):'';
+      var mailBtn='<a href="mailto:'+mailTo+'?subject='+mailSubject+'&body='+mailBody+'" class="mail-btn">'+
+        '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Email</a>';
+
+      return '<div class="drow'+(notEligible?' ineligible':'')+'">'+
+        flagHtml+
+        '<div class="drow-top">'+
+          '<div>'+
+            '<div class="drow-name">'+d.fname+' '+d.lname+'</div>'+
+            '<div class="drow-type">'+typeLabel+' · '+d.sex+'</div>'+
+          '</div>'+
+          '<span class="badge '+(diff<=0?'bok':'bwarn')+'" style="flex-shrink:0">'+(diff<=0?'Eligible':'Not Yet')+'</span>'+
+        '</div>'+
+        '<div class="drow-meta">'+
+          '<span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.99 12 19.79 19.79 0 0 1 1.93 3.22 2 2 0 0 1 3.9 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6.99 6.99l1.06-1.06a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>'+d.phone+'</span>'+
+          (d.email?'<span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>'+d.email+'</span>':'')+
+          '<span>Age '+d.age+'</span>'+
+          '<span>Next: '+fd(d.nextDate)+'</span>'+
+        '</div>'+
+        '<div class="drow-actions">'+smsBtn+mailBtn+editBtn+'</div>'+
+      '</div>';
+    }).join('');
+
+    return '<div class="dg-head"><span class="dg-date">'+labelPrefix+dLabel+'</span><span class="dg-count">'+group.length+' donation'+(group.length>1?'s':'')+'</span></div>'+rowsHtml;
+  }).join('');
+
+  if(groups) groups.innerHTML=html;
+}
+
+function clearSearch(){
+  var el=document.getElementById('dr-search');
+  if(el){el.value='';renderDonors();}
+}
+
+/* ── NOTIFICATIONS ── */
+/* Shows ALL donors (not just voluntary).
+   "Due for Donation" filter → donors whose 3-month window has passed (YES)
+   "All"               → everyone, with YES / NOT YET label
+   YES  = next eligible date is today or past (diff ≤ 0)
+   NOT YET = still within the 3-month window (diff > 0)
+*/
+function fN(f){
+  nFil=f;
+  ['all','due'].forEach(function(x){
+    var el=document.getElementById('fp-'+x);
+    if(el) el.classList.remove('on');
+  });
+  var target=document.getElementById('fp-'+f);
+  if(target) target.classList.add('on');
+  renderNotif();
+}
+
+function renderNotif(){
+  var vol=donors; // show ALL donors in notifications
+
+  /* count = how many are due (next date reached) */
+  var cnt=vol.filter(function(d){
+    var nd=new Date(d.nextDate),t=new Date();t.setHours(0,0,0,0);nd.setHours(0,0,0,0);
+    return Math.ceil((nd-t)/(24*3600*1000))<=0;
+  }).length;
+
+  document.getElementById('nbc').textContent=cnt;
+  var bdot=document.getElementById('bndot');
+  if(cnt>0){bdot.textContent=cnt;bdot.style.display='block';}else{bdot.style.display='none';}
+
+  /* filter */
+  var list=vol.filter(function(d){
+    var nd=new Date(d.nextDate),t=new Date();t.setHours(0,0,0,0);nd.setHours(0,0,0,0);
+    var diff=Math.ceil((nd-t)/(24*3600*1000));
+    if(nFil==='due') return diff<=0;  // Due for Donation = YES
+    return true;                      // All = everyone
+  });
+
+  var el=document.getElementById('notif-list');
+  if(!list.length){
+    el.innerHTML='<div class="empty"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#DDD" stroke-width="1.3"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><p>No notifications yet.</p></div>';
+    return;
+  }
+
+  el.innerHTML=list.map(function(d){
+    var nd=new Date(d.nextDate),t=new Date();t.setHours(0,0,0,0);nd.setHours(0,0,0,0);
+    var diff=Math.ceil((nd-t)/(24*3600*1000));
+    var isDue=diff<=0; // YES = 3 months have passed, can donate again
+
+    var yesNoLabel=isDue
+      ? '<span class="yesno yes">YES — Due for Donation</span>'
+      : '<span class="yesno notyet">NOT YET</span>';
+
+    var countdown=isDue
+      ? '<span style="font-size:.72rem;color:#1A6B45;font-weight:600">&#10003; Ready to donate now</span>'
+      : '<span style="font-size:.72rem;color:var(--text-soft)">'+cdTxt(d.nextDate)+'</span>';
+
+    var typeLabel=d.dtype==='voluntary'?'Voluntary':'Family Replacement';
+    var dotCls=isDue?'ndok':'ndwarn';
+    var icon=isDue?'✓':'!';
+
+    // Send Mail + Send SMS buttons — voluntary donors only
+    var mailBtn='';
+    var smsBtn='';
+    if(d.dtype==='voluntary'){
+      var mailSubject=encodeURIComponent('Blood Donation Reminder — LASUTH Blood Donor Clinic');
+      var mailBody=isDue
+        ? encodeURIComponent('Dear '+d.fname+' '+d.lname+',\n\nWe are pleased to inform you that you are now eligible to donate blood again.\n\nYour last donation was on '+fd(d.donDate)+'. You can now come in for your next donation at any time.\n\nYour generosity saves lives. We look forward to seeing you at LASUTH Blood Donor Clinic.\n\nThank you,\nLASUTH Blood Donor Clinic')
+        : encodeURIComponent('Dear '+d.fname+' '+d.lname+',\n\nThank you for your voluntary blood donation on '+fd(d.donDate)+'.\n\nYou will be eligible to donate again from '+fd(d.nextDate)+'. We will remind you as the date approaches.\n\nYour generosity saves lives.\n\nThank you,\nLASUTH Blood Donor Clinic');
+      var mailTo=d.email?encodeURIComponent(d.email):'';
+      mailBtn='<a href="mailto:'+mailTo+'?subject='+mailSubject+'&body='+mailBody+'" class="mail-btn">'+
+        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Send Mail</a>';
+      var smsBody=isDue
+        ? encodeURIComponent('Dear '+d.fname+', you are now eligible to donate blood again at LASUTH Blood Donor Clinic. Please come in at your earliest convenience. Thank you.')
+        : encodeURIComponent('Dear '+d.fname+', thank you for donating blood. You will be eligible to donate again on '+fd(d.nextDate)+'. LASUTH Blood Donor Clinic.');
+      smsBtn='<a href="sms:'+d.phone+'?body='+smsBody+'" class="bsms">'+
+        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Send SMS</a>';
+    }
+
+    return '<div class="ni" style="flex-direction:column;align-items:stretch;gap:.6rem">'+
+      '<div style="display:flex;align-items:center;gap:.75rem">'+
+        '<div class="ndot '+dotCls+'">'+icon+'</div>'+
+        '<div style="flex:1;min-width:0">'+
+          '<h4>'+d.fname+' '+d.lname+'</h4>'+
+          '<div style="font-size:.74rem;color:var(--text-soft);margin-top:.1rem">'+typeLabel+'</div>'+
+        '</div>'+
+        yesNoLabel+
+      '</div>'+
+      '<div style="background:#F8F3F3;border-radius:8px;padding:.6rem .8rem;font-size:.78rem;line-height:1.7;color:var(--text-dark)">'+
+        '<div><strong style="color:var(--text-mid);font-size:.67rem;text-transform:uppercase;letter-spacing:.07em">Phone</strong><br>'+d.phone+'</div>'+
+        (d.email?'<div style="margin-top:.3rem"><strong style="color:var(--text-mid);font-size:.67rem;text-transform:uppercase;letter-spacing:.07em">Email</strong><br>'+d.email+'</div>':'')+
+        '<div style="margin-top:.3rem;display:flex;gap:1.2rem;flex-wrap:wrap">'+
+          '<div><strong style="color:var(--text-mid);font-size:.67rem;text-transform:uppercase;letter-spacing:.07em">Last Donated</strong><br>'+fd(d.donDate)+'</div>'+
+          '<div><strong style="color:var(--text-mid);font-size:.67rem;text-transform:uppercase;letter-spacing:.07em">Next Eligible</strong><br>'+fd(d.nextDate)+'</div>'+
+        '</div>'+
+        '<div style="margin-top:.4rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap">'+
+          countdown+
+          '<div style="display:flex;gap:.4rem;flex-wrap:wrap">'+smsBtn+mailBtn+'</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+/* ── EDIT MODAL ── */
+function openEdit(i){
+  var d=donors[i];
+  document.getElementById('ei').value=i;
+  document.getElementById('efn').value=d.fname;
+  document.getElementById('eln').value=d.lname;
+  document.getElementById('esx').value=d.sex;
+  document.getElementById('edob').value=d.dob;
+  document.getElementById('eage').value=d.age+' yrs';
+  document.getElementById('eph').value=d.phone;
+  document.getElementById('eem').value=d.email||'';
+  document.getElementById('edt').value=d.dtype;
+  document.getElementById('edd').value=d.donDate;
+  var nd=new Date(d.nextDate);
+  document.getElementById('ecv').textContent=nd.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('echip').classList.add('on');
+  document.getElementById('edit-modal').classList.add('open');
+}
+function closeMod(){document.getElementById('edit-modal').classList.remove('open');}
+function saveEdit(){
+  var i=parseInt(document.getElementById('ei').value);
+  var fn=document.getElementById('efn').value.trim();
+  var ln=document.getElementById('eln').value.trim();
+  var sx=document.getElementById('esx').value;
+  var db=document.getElementById('edob').value;
+  var ph=document.getElementById('eph').value.trim();
+  var em=document.getElementById('eem').value.trim();
+  var dt=document.getElementById('edt').value;
+  var dd=document.getElementById('edd').value;
+  if(!fn||!ln||!sx||!db||!ph||!dt||!dd){toast('Please fill all fields.');return;}
+  var age=Math.floor((new Date()-new Date(db))/(365.25*24*3600*1000));
+  var nd=new Date(dd);nd.setMonth(nd.getMonth()+3);
+  donors[i]={fname:fn,lname:ln,sex:sx,dob:db,age:age,phone:ph,email:em,dtype:dt,donDate:dd,nextDate:nd.toISOString().split('T')[0]};
+  closeMod();toast('Donor updated!');renderAll();
+}
+document.getElementById('edit-modal').addEventListener('click',function(e){if(e.target===this)closeMod();});
+
+/* ── CLOCK ── */
+var cki=null;
+function startClock(){if(cki)return;cki=setInterval(tick,1000);tick();}
+function tick(){
+  var n=new Date();
+  var timeStr=n.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  var dateStr=n.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  var ckt=document.getElementById('ckt'); if(ckt) ckt.textContent=timeStr;
+  var ckd=document.getElementById('ckd'); if(ckd) ckd.textContent=dateStr;
+}
+
+/* ── TOAST ── */
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(function(){t.style.display='none';},2800);}
+
+renderAll();
+</script>
+</body>
+</html>
