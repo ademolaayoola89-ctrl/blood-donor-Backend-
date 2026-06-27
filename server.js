@@ -30,7 +30,7 @@ app.use(express.urlencoded({ extended: false }))
 app.use(express.static(path.join(__dirname)))
 
 // ── Database Setup ────────────────────────────────────────────
-const DATA_DIR = path.join(__dirname, 'data')
+const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data')
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR)
 
 const db = new sqlite3.Database(path.join(DATA_DIR, 'donors.db'), err => {
